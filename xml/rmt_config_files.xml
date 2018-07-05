@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sect1
+[
+  <!ENTITY % entities SYSTEM "entity-decl.ent">
+    %entities;
+]>
+
+<sect1 xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0" xml:id="sec.rmt_config">
+ <title>&rmt; Configuration Files</title>
+
+ <para>
+  The main &rmt; configuration file is <filename>/etc/rmt.conf</filename>.
+  You can set most of the options with the &yast; &rmt; Server module.
+  Another important configuration file is
+  <filename>/etc/smt.d/smt-cron.conf</filename>, which contains parameters
+  for commands launched as &rmt; scheduled jobs.
+ </para>
+
+ <sect2 xml:id="sec.rmt_config.rmtconf">
+  <title>/etc/rmt.conf</title>
+  <para>
+   As described in the PREREQUISITE section, the recommended way to
+   perform initial configuration of &rmt; is using its &yast; module. The
+   &yast; &rmt; module will take care of configuring SCC credentials,
+   setting up the database and creating SSL certificates. However, if
+   you want to reconfigure specific settings manually, this section
+   tells you how.
+  </para>
+  <para>
+   All available configuration options can be found in the
+   <filename>/etc/rmt.conf</filename> file.
+  </para>
+  <sect3 xml:id="sec.rmt_config.rmtconf.ssl">
+   <title>SSL Certificates and HTTPS</title>
+   <para>
+    By default access to API endpoints consumed by
+    <command>&suse;Connect</command> is limited to HTTPS only. nginx is
+    configured to use SSL certificate and private key from the following
+    locations:
+   </para>
+   <itemizedlist>
+    <listitem>
+    <para>Certificate: <filename>/usr/share/rmt/ssl/rmt-server.crt</filename></para>
+    </listitem>
+    <listitem>
+     <para>Private key: <filename>/usr/share/rmt/ssl/rmt-server.key</filename></para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    &yast; &rmt; module generates a custom certificate authority which
+    is used to sign HTTPS certificates, which means that to register,
+    this certificate authority must be trusted by the client machines:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      For registrations during installation from the media or with
+      &yast; Registration module, a message will appear, prompting to
+      trust the server certificate.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      For registering a client system on the command line, use the
+      rmt-client-setup script. It is provided at the following URL:
+      http://<replaceable>&rmt;_HOSTNAME</replaceable>/tools/rmt-client-setup.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    The script requires only the &rmt; server host name as a mandatory
+    parameter, for example:
+   </para>
+<screen>&prompt.root;<command>wget http://rmt.example.org/tools/rmt-client-setup</command>
+&prompt.root;<command>chmod +x ./rmt-client-setup</command>
+&prompt.root;<command>./rmt-client-setup http://rmt.example.org</command></screen>
+   <para>
+    Executing this script will import the &rmt; CA´s certificate into
+    the trusted store and after that, run &suse;Connect to register the
+    client with the &rmt;.
+   </para>
+  </sect3>
+  <sect3 xml:id="sec.rmt_config.rmtconf.mirror">
+   <title>Mirroring settings</title>
+   <para>
+    The <literal>mirroring</literal> section lets you adjust mirroring
+    behavior.
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><literal>mirror_src</literal></term>
+     <listitem>
+      <para>
+       Decides whether to mirror source RPM packages (architecture is
+       <literal>src</literal>).
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>verify_rpm_checksums</literal></term>
+     <listitem>
+      <para>
+       Decides whether to mirror source RPM packages (architecture is
+       <literal>src</literal>).
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>dedup_method</literal></term>
+     <listitem>
+      <para>
+       Enables deduplication when set to <literal>hardlink</literal>.
+       Possible values: <literal>hardlink</literal>,
+       <literal>copy</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect3>
+  <sect3 xml:id="sec.rmt_config.rmtconf.client">
+   <title>HTTP Client Settings</title>
+   <para>
+    The <literal>http_client</literal> section defines the global HTTP
+    connection settings of &rmt;.
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><literal>verbose</literal></term>
+     <listitem>
+      <para>
+       Enables additional debug output to the &systemd; journal.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>proxy</literal></term>
+     <listitem>
+      <para>
+       The proxy server URL.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>proxy_auth</literal></term>
+     <listitem>
+      <para>
+       This setting determines the
+       proxy authentication mechanism. Possible values are:
+       <option>none</option>, <option>basic</option>,
+       <option>digest</option>, <option>gssnegotiate</option>,
+       <option>ntlm</option>, <option>digest_ie</option>,
+       <option>ntlm_wb</option>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>proxy_user</literal></term>
+     <listitem>
+      <para>
+       The proxy server user name.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>proxy_password</literal></term>
+     <listitem>
+      <para>
+       The proxy server password.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect3>
+  <sect3 xml:id="sec.rmt_config.rmtconf.access_scc">
+   <title>Settings for Accessing &suse; Repositories</title>
+   <para>
+    The <literal>scc</literal> section contains your organization
+    credentials for mirroring &suse; repositories from the &scc;. Your
+    organization credentials can be obtained from the &scc; <link
+    xlink:href="https://scc.suse.com/"/>.
+   </para>
+   <para>
+    Valid configuration keys for the section are:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><literal>username</literal></term>
+     <listitem>
+      <para>
+       The &scc; user name.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>username</literal></term>
+     <listitem>
+      <para>
+       The &scc; password.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect3>
+ </sect2>
+</sect1>
