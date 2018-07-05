@@ -1,0 +1,6 @@
+= Documentation CI Testing Repo 
+
+(SUSE Linux Enterprise / openSUSE Leap Documentation)
+
+image:https://travis-ci.org/tomschr/doc-test.svg?branch=develop["Build Status", link="https://travis-ci.org/tomschr/doc-test"]
+
